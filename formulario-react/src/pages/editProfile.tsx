@@ -19,6 +19,10 @@ export function EditProfile() {
       ...data, // Atualiza todos os campos recebidos do formulário
     };
 
+    if (data.profileImage) {
+      updatedUser.profileImage = data.profileImage;
+    }
+
     UserService.updateUser(updatedUser);
     alert("Perfil atualizado com sucesso!");
     navigate("/edit");
@@ -29,9 +33,21 @@ export function EditProfile() {
       className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center w-[1910px]"
       style={{ backgroundImage: `url(${Wallpaper})` }}
     >
-      <div className="bg-black/50 p-8 rounded-xl w-4/5 max-h-[80vh] overflow-y-auto">
-        <h1 className="text-2xl font-bold mb-6 text-white">Editar Perfil</h1>
-
+      <div className="col-span bg-black/50 p-8 rounded-xl w-4/5 max-h-[80vh] overflow-y-auto">
+        <div className="flex justify-between items-start mb-6">
+          <h1 className="text-2xl font-bold text-white">Editar Perfil</h1>
+          
+          {activeUser.profileImage && (
+            <div className="flex justify-end">
+              <img
+                src={activeUser.profileImage}
+                alt="Foto de Perfil"
+                className="w-32 h-32 rounded-full object-cover border-2 border-white"
+              />
+            </div>
+          )}
+        </div>
+  
         <UserForm
           onSubmit={handleSubmit}
           initialValues={activeUser}
@@ -45,10 +61,10 @@ export function EditProfile() {
             "gender",
             "state",
             "techAreas",
-            "profileImage", // Certifique-se de passar a imagem aqui
+            "profileImage",
           ]}
         />
-
+  
         <div className="flex justify-end mt-4">
           <button
             type="button"

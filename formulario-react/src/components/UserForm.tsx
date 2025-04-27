@@ -15,7 +15,7 @@ type UserFormProps = {
   initialValues?: Partial<FormData>;
   submitText?: string;
   showTerms?: boolean;
-  fieldsToShow?: (keyof FormData)[];
+  fieldsToShow?: (keyof FormData)[]; // Campos que devem ser exibidos
 };
 
 export function UserForm({
@@ -31,7 +31,7 @@ export function UserForm({
     setValue,
     trigger,
     control,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: initialValues,
@@ -50,6 +50,26 @@ export function UserForm({
 
   const shouldShow = (field: keyof FormData) =>
     !fieldsToShow || fieldsToShow.includes(field);
+
+  // Função para lidar com a mudança da imagem de perfil
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const base64 = await toBase64(file);
+      setValue("profileImage", base64); // Atualiza o valor do campo profileImage
+      trigger("profileImage"); // Valida o campo da imagem
+    }
+  };
+
+  // Função auxiliar para converter a imagem para base64
+  function toBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-6">
@@ -99,11 +119,7 @@ export function UserForm({
           id="gender"
           control={control}
           error={errors.gender}
-          options={[
-            { value: "Masculino", label: "Masculino" },
-            { value: "Feminino", label: "Feminino" },
-            { value: "Outro", label: "Outro" },
-          ]}
+          options={[{ value: "Masculino", label: "Masculino" }, { value: "Feminino", label: "Feminino" }, { value: "Outro", label: "Outro" }]}
         />
       )}
 
@@ -133,27 +149,17 @@ export function UserForm({
           <input
             type="file"
             id="profileImage"
-            accept="image/jpeg"
+            accept="image/*"
             className="w-full px-4 py-2 rounded bg-zinc-800 text-white
               file:mr-4 file:py-2 file:px-4 file:rounded
               file:border-0 file:text-sm file:font-semibold
               file:bg-blue-50 file:text-blue-700
               hover:file:bg-blue-100"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    const base64Image = reader.result as string;
-                    setValue("profileImage", base64Image);
-                    trigger("profileImage");
-                  };
-                  reader.readAsDataURL(file);
-              }
-            }}
+            onChange={handleImageChange}
+            aria-describedby={errors.profileImage ? "profileImage-error" : undefined}
           />
           {errors.profileImage && (
-            <span className="text-red-500 text-sm">
+            <span id="profileImage-error" className="text-red-500 text-sm">
               {errors.profileImage.message}
             </span>
           )}
@@ -171,9 +177,10 @@ export function UserForm({
 
       <button
         type="submit"
-        className="col-span-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded transition"
+        disabled={isSubmitting}
+        className="col-span-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {submitText}
+        {isSubmitting ? "Enviando..." : submitText}
       </button>
     </form>
   );

@@ -1,91 +1,66 @@
-import { useForm } from "react-hook-form"; 
-import { z } from "zod"; 
-import { zodResolver } from "@hookform/resolvers/zod"; 
-import { useNavigate } from "react-router-dom"; 
-import { useFeedback } from "../hooks/useFeedback"; 
-import { InputField } from "../components/InputField"; 
-import { UserService } from "../services/UserService"; 
-import Wallpaper from "../assets/Wallpaper.jpg"; 
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "react-router-dom";
+import { useFeedback } from "../hooks/useFeedback";
+import { InputField } from "../components/InputField";
+import { UserService } from "../services/UserService";
+import Wallpaper from "../assets/Wallpaper.jpg";
 
 // Esquema de validação com Zod para o formulário de login
 const loginSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
   email: z.string().email("Email inválido"),
   password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
 });
 
-// Tipo derivado do esquema para ser usado no formulário
+// Tipo derivado do esquema
 type LoginData = z.infer<typeof loginSchema>;
 
 export function Login() {
-  // Configuração do formulário com validação baseada no esquema loginSchema
   const {
-    register, // Registra os campos no formulário
-    handleSubmit, // Lida com o envio do formulário
-    formState: { errors }, // Captura os erros de validação
+    register,
+    handleSubmit,
+    formState: { errors },
   } = useForm<LoginData>({
-    resolver: zodResolver(loginSchema), // Conecta o Zod ao formulário
+    resolver: zodResolver(loginSchema),
   });
 
-  const { feedback, setFeedback, getFeedbackColor } = useFeedback(); // Controle de mensagens de feedback
-  const navigate = useNavigate(); // Permite redirecionamento entre rotas
+  const { feedback, setFeedback, getFeedbackColor } = useFeedback();
+  const navigate = useNavigate();
 
-  // Função executada ao enviar o formulário
   const handleLogin = (data: LoginData) => {
-    const name = data.name.trim(); // Remove espaços extras do nome
-    const email = data.email.trim().toLowerCase(); // Padroniza o email
+    const email = data.email.trim().toLowerCase();
     const password = data.password;
 
-    const user = UserService.userExists(email); // Verifica se o usuário existe pelo email
+    const user = UserService.userExists(email);
 
-    // Se o usuário não for encontrado
     if (!user) {
       setFeedback("Usuário não encontrado.");
       return;
     }
 
-    // Se o nome não coincidir
-    if (user.name !== name) {
-      setFeedback("Nome incorreto.");
-      return;
-    }
-
-    // Se a senha estiver incorreta
     if (user.password !== password) {
       setFeedback("Senha incorreta.");
       return;
     }
 
-    // Se tudo estiver correto, define o usuário como ativo
     UserService.setActiveUser(email);
-
-    // Mostra mensagem de boas-vindas
-    setFeedback(`Bem-vindo(a) de volta, ${name}!`);
-
-    // Redireciona para a tela de boas-vindas após 2 segundos
+    setFeedback(`Bem-vindo(a) de volta, ${user.name}!`);
     setTimeout(() => navigate("/welcome"), 2000);
   };
 
   return (
     <div
       className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center w-[1910px] relative"
-      style={{ backgroundImage: `url(${Wallpaper})` }} // Define o papel de parede como fundo
+      style={{ backgroundImage: `url(${Wallpaper})` }}
     >
       <form
-        onSubmit={handleSubmit(handleLogin)} // Envia os dados do formulário após validação
+        onSubmit={handleSubmit(handleLogin)}
         className="bg-black/50 text-white p-8 rounded-xl shadow-lg w-[500px] backdrop-blur-sm"
       >
         <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
 
         <div className="flex flex-col gap-4">
-          {/* Campo de nome */}
-          <InputField
-            label="Nome:"
-            id="name"
-            error={errors.name}
-            registration={register("name")}
-          />
-
           {/* Campo de email */}
           <InputField
             label="Email:"
@@ -104,7 +79,7 @@ export function Login() {
             registration={register("password")}
           />
 
-          {/* Botão de envio */}
+          {/* Botão de login */}
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded transition"
@@ -112,8 +87,8 @@ export function Login() {
             Entrar
           </button>
 
-          {/* Botão de navegação para cadastro */}
-          <div className="fixed top-147 left-273 flex gap-4 z-50">
+          {/* Botão para voltar ao cadastro */}
+          <div className="flex justify-center mt-4">
             <button
               type="button"
               onClick={() => navigate("/")}
@@ -123,7 +98,7 @@ export function Login() {
             </button>
           </div>
 
-          {/* Exibição da mensagem de feedback, se existir */}
+          {/* Mensagem de feedback */}
           {feedback && (
             <p className={`text-center mt-2 ${getFeedbackColor()}`}>
               {feedback}

@@ -14,25 +14,25 @@ export function Form() {
     const email = data.email.trim().toLowerCase();
     const password = data.password;
 
-    const userExistente = UserService.userExists(email);
+    const existingUser = UserService.userExists(email);
 
-    if (userExistente) {
-      if (userExistente.name !== name) {
+    if (existingUser) {
+      if (existingUser.name !== name) {
         setFeedback("Email já em uso.");
         return;
       }
-      if (userExistente.password !== password) {
+      if (existingUser.password !== password) {
         setFeedback("Senha incorreta.");
         return;
       }
 
       UserService.setActiveUser(email);
-      setFeedback(`Bem-vindo(a) de volta, ${userExistente.name}!`);
+      setFeedback(`Bem-vindo(a) de volta, ${existingUser.name}!`);
       setTimeout(() => navigate("/welcome"), 2000);
       return;
     }
 
-    UserService.saveUser({
+    const newUser = {
       name,
       email,
       password,
@@ -42,10 +42,12 @@ export function Form() {
       state: data.state,
       techAreas: data.techAreas,
       acceptTerms: data.acceptTerms,
-    });
-    
+    };
+
+    UserService.saveUser(newUser);
     UserService.saveEmail(email);
     UserService.setActiveUser(email);
+
     setFeedback(`Cadastro realizado com sucesso, ${name}!`);
     setTimeout(() => navigate("/welcome"), 2000);
   };
@@ -57,10 +59,13 @@ export function Form() {
     >
       <div className="bg-black/50 text-white p-8 rounded-xl shadow-lg w-[900px] backdrop-blur-sm">
         <h2 className="text-2xl font-bold text-center col-span-2 mb-6">Cadastro</h2>
+
         <UserForm onSubmit={handleFormSubmit} />
+
         {feedback && (
           <p className={`text-center mt-4 ${getFeedbackColor()}`}>{feedback}</p>
         )}
+
         <div className="flex justify-center mt-4 gap-4">
           <button
             type="button"
