@@ -21,7 +21,6 @@ export function Edit() {
     // Confirmação via alerta antes de excluir
     if (window.confirm(`Tem certeza que deseja excluir ${name}?`)) {
       UserService.deleteUser(email); // Remove o usuário
-      UserService.setActiveUser(null);
       setUsers(UserService.getUsers()); // Atualiza o estado com a nova lista
     }
   };
@@ -53,10 +52,7 @@ export function Edit() {
               <div className="flex gap-2">
                 {/* Botão para editar perfil do usuário */}
                 <button
-                  onClick={() => {
-                    UserService.setActiveUser(user.email);
-                    navigate(`/edit-profile/${user.email}`);
-                  }}
+                  onClick={() => navigate(`/edit-profile/${user.email}`)}
                   className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white"
                 >
                   Editar
