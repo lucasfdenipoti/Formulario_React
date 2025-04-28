@@ -46,7 +46,7 @@ export function Login() {
 
     UserService.setActiveUser(email);
     setFeedback(`Bem-vindo(a) de volta, ${user.name}!`);
-    setTimeout(() => navigate("/welcome"), 2000);
+    setTimeout(() => navigate("/welcome"), 500);
   };
 
   return (

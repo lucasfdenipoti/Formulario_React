@@ -26,9 +26,9 @@ export function Form() {
         return;
       }
 
-      UserService.setActiveUser(email);
+      UserService.setActiveUser(updatedUser.email);
       setFeedback(`Bem-vindo(a) de volta, ${existingUser.name}!`);
-      setTimeout(() => navigate("/welcome"), 2000);
+      setTimeout(() => navigate("/welcome"), 500);
       return;
     }
 
@@ -42,6 +42,7 @@ export function Form() {
       state: data.state,
       techAreas: data.techAreas,
       acceptTerms: data.acceptTerms,
+      academicBackground: data.academicBackground,
     };
 
     UserService.saveUser(newUser);
@@ -49,7 +50,7 @@ export function Form() {
     UserService.setActiveUser(email);
 
     setFeedback(`Cadastro realizado com sucesso, ${name}!`);
-    setTimeout(() => navigate("/welcome"), 2000);
+    setTimeout(() => navigate("/welcome"), 500);
   };
 
   return (

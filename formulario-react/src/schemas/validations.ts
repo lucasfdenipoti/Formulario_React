@@ -73,6 +73,14 @@ export const formSchema = z.object({
 
   // Campo Imagem de Perfil:
   profileImage: z.string().min(1, "Foto de perfil é obrigatória"),
+
+  // Novo Campo de Formação Acadêmica:
+  academicBackground: z.array(
+    z.object({
+      university: z.string().min(1, "Universidade é obrigatória"),
+      degree: z.string().min(1, "Grau acadêmico é obrigatório"),
+    })
+  ).min(1, "Você deve fornecer ao menos uma formação acadêmica"),
 });
 
 

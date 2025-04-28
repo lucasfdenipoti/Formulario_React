@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formSchema, FormData } from "../schemas/validations";
 import { InputField } from "../components/InputField";
@@ -7,6 +7,7 @@ import {
   StateSelectField,
   MultiSelectTI,
 } from "../components/SelectField";
+import { AcademicBackgroundField } from "../components/AcademicField";
 import { CheckboxField } from "../components/CheckboxField";
 import { useEffect } from "react";
 
@@ -15,7 +16,7 @@ type UserFormProps = {
   initialValues?: Partial<FormData>;
   submitText?: string;
   showTerms?: boolean;
-  fieldsToShow?: (keyof FormData)[]; // Campos que devem ser exibidos
+  fieldsToShow?: (keyof FormData)[];
 };
 
 export function UserForm({
@@ -37,7 +38,11 @@ export function UserForm({
     defaultValues: initialValues,
   });
 
-  // Preenche valores iniciais ao editar
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "academicBackground",
+  });
+
   useEffect(() => {
     if (initialValues) {
       Object.entries(initialValues).forEach(([key, value]) => {
@@ -51,17 +56,15 @@ export function UserForm({
   const shouldShow = (field: keyof FormData) =>
     !fieldsToShow || fieldsToShow.includes(field);
 
-  // Função para lidar com a mudança da imagem de perfil
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const base64 = await toBase64(file);
-      setValue("profileImage", base64); // Atualiza o valor do campo profileImage
-      trigger("profileImage"); // Valida o campo da imagem
+      setValue("profileImage", base64);
+      trigger("profileImage");
     }
   };
 
-  // Função auxiliar para converter a imagem para base64
   function toBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -73,6 +76,7 @@ export function UserForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-6">
+      {/* Seus campos normais */}
       {shouldShow("name") && (
         <InputField
           label="Nome:"
@@ -119,7 +123,11 @@ export function UserForm({
           id="gender"
           control={control}
           error={errors.gender}
-          options={[{ value: "Masculino", label: "Masculino" }, { value: "Feminino", label: "Feminino" }, { value: "Outro", label: "Outro" }]}
+          options={[
+            { value: "Masculino", label: "Masculino" },
+            { value: "Feminino", label: "Feminino" },
+            { value: "Outro", label: "Outro" },
+          ]}
         />
       )}
 
@@ -142,7 +150,7 @@ export function UserForm({
       )}
 
       {shouldShow("profileImage") && (
-        <div className="col-span">
+        <div className="col-span-1">
           <label htmlFor="profileImage" className="block mb-1 text-white">
             Foto de Perfil:
           </label>
@@ -156,7 +164,9 @@ export function UserForm({
               file:bg-blue-50 file:text-blue-700
               hover:file:bg-blue-100"
             onChange={handleImageChange}
-            aria-describedby={errors.profileImage ? "profileImage-error" : undefined}
+            aria-describedby={
+              errors.profileImage ? "profileImage-error" : undefined
+            }
           />
           {errors.profileImage && (
             <span id="profileImage-error" className="text-red-500 text-sm">
@@ -166,13 +176,24 @@ export function UserForm({
         </div>
       )}
 
-      {showTerms && shouldShow("acceptTerms") && (
-        <CheckboxField
-          label="Aceito os termos e condições"
-          id="acceptTerms"
-          error={errors.acceptTerms}
-          registration={register("acceptTerms")}
+      {shouldShow("academicBackground") && (
+        <AcademicBackgroundField
+          label="Formação Acadêmica"
+          id="academicBackground"
+          control={control}
+          error={errors.academicBackground}
         />
+      )}
+
+      {showTerms && shouldShow("acceptTerms") && (
+        <div className="col-span-2">
+          <CheckboxField
+            label="Aceito os termos e condições"
+            id="acceptTerms"
+            error={errors.acceptTerms}
+            registration={register("acceptTerms")}
+          />
+        </div>
       )}
 
       <button

@@ -14,14 +14,14 @@ export class UserService {
 
   // Salva um novo usuário, caso o email ainda não tenha sido cadastrado
   static saveUser(user: FormData) {
-    console.log("Salvando usuário com imagem: ", user.profileImage); // Verificar valor da imagem
+    console.log("Salvando usuário com imagem: ", user.profileImage);
     const users = this.getUsers();
     const exists = users.some((u) => u.email === user.email);
     if (exists) return;
   
     const updatedUsers = [...users, user];
     localStorage.setItem(this.USERS_KEY, JSON.stringify(updatedUsers));
-  }  
+  } 
 
   // Salva um novo email na lista de emails cadastrados
   static saveEmail(email: string) {

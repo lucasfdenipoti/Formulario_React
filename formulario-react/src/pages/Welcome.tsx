@@ -11,17 +11,18 @@ import Wallpaper from "../assets/Wallpaper.jpg";
 export function Welcome() {
   const navigate = useNavigate(); // Hook para redirecionar de rota
   const [userName, setUserName] = useState<string | null>(null); // Estado para armazenar o nome do usuário
-  const profileImage = localStorage.getItem("profileImage");
+  const [profileImage, setProfileImage] = useState<string | null>(null);
 
   // useEffect executa ao montar o componente
   useEffect(() => {
     // Obtém o usuário ativo através do serviço UserService
     const user = UserService.getActiveUser();
-  
+
     if (user) {
-      setUserName(user.name); // Atualiza o nome do usuário
+      setUserName(user.name);
+      setProfileImage(user.profileImage || null);
     }
-  }, []);  
+  }, []);
 
   // Função chamada ao clicar em "Novo Login"
   const handleNewLogin = () => {

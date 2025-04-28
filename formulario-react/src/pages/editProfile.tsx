@@ -1,12 +1,14 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { UserService } from "../services/UserService";
 import { FormData } from "../types/FormData";
 import { UserForm } from "../components/UserForm";
 import Wallpaper from "../assets/Wallpaper.jpg";
 
 export function EditProfile() {
+  const { email } = useParams();
   const navigate = useNavigate();
-  const activeUser = UserService.getActiveUser();
+  const activeUser = UserService.getUsers().find(user => user.email === email);
+  
 
   if (!activeUser) {
     navigate("/login");
@@ -19,11 +21,16 @@ export function EditProfile() {
       ...data, // Atualiza todos os campos recebidos do formulário
     };
 
+    if (data.academicBackground) {
+      updatedUser.academicBackground = data.academicBackground;
+    }
+
     if (data.profileImage) {
       updatedUser.profileImage = data.profileImage;
     }
 
-    UserService.updateUser(updatedUser);
+    UserService.updateUser(data);
+    UserService.setActiveUser(data.email);
     alert("Perfil atualizado com sucesso!");
     navigate("/edit");
   };
@@ -36,7 +43,7 @@ export function EditProfile() {
       <div className="col-span bg-black/50 p-8 rounded-xl w-4/5 max-h-[80vh] overflow-y-auto">
         <div className="flex justify-between items-start mb-6">
           <h1 className="text-2xl font-bold text-white">Editar Perfil</h1>
-          
+
           {activeUser.profileImage && (
             <div className="flex justify-end">
               <img
@@ -47,10 +54,13 @@ export function EditProfile() {
             </div>
           )}
         </div>
-  
+
         <UserForm
           onSubmit={handleSubmit}
-          initialValues={activeUser}
+          initialValues={{ 
+            ...activeUser, 
+            academicBackground: activeUser.academicBackground || []
+          }}
           submitText="Salvar Alterações"
           showTerms={false}
           fieldsToShow={[
@@ -62,9 +72,10 @@ export function EditProfile() {
             "state",
             "techAreas",
             "profileImage",
+            "academicBackground",
           ]}
         />
-  
+
         <div className="flex justify-end mt-4">
           <button
             type="button"
