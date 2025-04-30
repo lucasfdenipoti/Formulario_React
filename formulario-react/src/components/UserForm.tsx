@@ -11,14 +11,16 @@ import { AcademicBackgroundField } from "../components/AcademicField";
 import { CheckboxField } from "../components/CheckboxField";
 import { useEffect } from "react";
 
+// Tipagem dos props esperados pelo UserForm
 type UserFormProps = {
-  onSubmit: (data: FormData) => void;
-  initialValues?: Partial<FormData>;
-  submitText?: string;
-  showTerms?: boolean;
-  fieldsToShow?: (keyof FormData)[];
+  onSubmit: (data: FormData) => void;          // Função chamada ao enviar o formulário
+  initialValues?: Partial<FormData>;           // Valores iniciais (ex: para edição)
+  submitText?: string;                         // Texto do botão de envio
+  showTerms?: boolean;                         // Se deve mostrar o checkbox de termos
+  fieldsToShow?: (keyof FormData)[];           // Campos a serem exibidos dinamicamente
 };
 
+// Componente principal do formulário
 export function UserForm({
   onSubmit,
   initialValues = {},
@@ -26,6 +28,7 @@ export function UserForm({
   showTerms = true,
   fieldsToShow,
 }: UserFormProps) {
+  // Configuração do React Hook Form com Zod
   const {
     register,
     handleSubmit,
@@ -34,15 +37,17 @@ export function UserForm({
     control,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: initialValues,
+    resolver: zodResolver(formSchema),       // Integra Zod como validador
+    defaultValues: initialValues,            // Define valores padrão (edição)
   });
 
+  // Gerencia campos dinâmicos de formação acadêmica
   const { fields, append, remove } = useFieldArray({
     control,
     name: "academicBackground",
   });
 
+  // Preenche campos com valores iniciais se houver (ex: edição)
   useEffect(() => {
     if (initialValues) {
       Object.entries(initialValues).forEach(([key, value]) => {
@@ -53,18 +58,21 @@ export function UserForm({
     }
   }, [initialValues, setValue]);
 
+  // Função utilitária para verificar se o campo deve ser exibido
   const shouldShow = (field: keyof FormData) =>
     !fieldsToShow || fieldsToShow.includes(field);
 
+  // Converte imagem para base64 e define no formulário
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const base64 = await toBase64(file);
-      setValue("profileImage", base64);
-      trigger("profileImage");
+      const base64 = await toBase64(file);       // Converte a imagem
+      setValue("profileImage", base64);          // Define no estado do form
+      trigger("profileImage");                   // Valida o campo
     }
   };
 
+  // Utilitário para converter um arquivo para base64
   function toBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -74,9 +82,11 @@ export function UserForm({
     });
   }
 
+  // Renderização do formulário
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-6">
-      {/* Seus campos normais */}
+      
+      {/* Campo: Nome */}
       {shouldShow("name") && (
         <InputField
           label="Nome:"
@@ -86,6 +96,7 @@ export function UserForm({
         />
       )}
 
+      {/* Campo: Email */}
       {shouldShow("email") && (
         <InputField
           label="Email:"
@@ -96,6 +107,7 @@ export function UserForm({
         />
       )}
 
+      {/* Campo: Senha */}
       {shouldShow("password") && (
         <InputField
           label="Senha:"
@@ -106,17 +118,19 @@ export function UserForm({
         />
       )}
 
+      {/* Campo: Data de Nascimento */}
       {shouldShow("birthDate") && (
         <InputField
           label="Data de Nascimento:"
           id="birthDate"
           type="date"
-          max={new Date().toISOString().split("T")[0]}
+          max={new Date().toISOString().split("T")[0]} // Impede datas futuras
           error={errors.birthDate}
           registration={register("birthDate")}
         />
       )}
 
+      {/* Campo: Gênero (Select) */}
       {shouldShow("gender") && (
         <SelectField
           label="Gênero:"
@@ -131,6 +145,7 @@ export function UserForm({
         />
       )}
 
+      {/* Campo: Estado (Select customizado) */}
       {shouldShow("state") && (
         <StateSelectField
           label="Estado:"
@@ -140,6 +155,7 @@ export function UserForm({
         />
       )}
 
+      {/* Campo: Áreas de Interesse em TI (MultiSelect) */}
       {shouldShow("techAreas") && (
         <MultiSelectTI
           label="Áreas de TI de Interesse:"
@@ -149,6 +165,7 @@ export function UserForm({
         />
       )}
 
+      {/* Campo: Upload de Foto */}
       {shouldShow("profileImage") && (
         <div className="col-span-1">
           <label htmlFor="profileImage" className="block mb-1 text-white">
@@ -176,6 +193,7 @@ export function UserForm({
         </div>
       )}
 
+      {/* Campo: Formação Acadêmica (múltiplas entradas) */}
       {shouldShow("academicBackground") && (
         <AcademicBackgroundField
           label="Formação Acadêmica"
@@ -185,6 +203,7 @@ export function UserForm({
         />
       )}
 
+      {/* Campo: Aceite dos termos (se showTerms for true) */}
       {showTerms && shouldShow("acceptTerms") && (
         <div className="col-span-2">
           <CheckboxField
@@ -196,6 +215,7 @@ export function UserForm({
         </div>
       )}
 
+      {/* Botão de envio */}
       <button
         type="submit"
         disabled={isSubmitting}

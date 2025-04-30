@@ -2,10 +2,9 @@ import { useNavigate } from "react-router-dom";
 import { UserForm } from "../components/UserForm";
 import { FormData } from "../schemas/validations";
 import { useFeedback } from "../hooks/useFeedback";
-import { UserService } from "../services/UserService";
 import Wallpaper from "../assets/Wallpaper.jpg";
 
-export function Form() {
+export function CompanyForm() {
   // Usa o hook personalizado para controlar mensagens de feedback
   const { feedback, setFeedback, getFeedbackColor } = useFeedback();
   // Usa o hook do React Router para redirecionar o usuário
@@ -15,59 +14,6 @@ export function Form() {
   const handleFormSubmit = (data: FormData) => {
     // Normaliza os dados de nome e email
     const name = data.name.trim();
-    const email = data.email.trim().toLowerCase();
-    const password = data.password;
-
-    // Verifica se o usuário já existe no localStorage
-    const existingUser = UserService.userExists(email);
-
-    // Se já existir, realiza validações:
-    if (existingUser) {
-      // Se o nome for diferente do nome registrado para esse email, indica que o email já está em uso
-      if (existingUser.name !== name) {
-        setFeedback("Email já em uso.");
-        return;
-      }
-      // Se a senha estiver errada, retorna erro
-      if (existingUser.password !== password) {
-        setFeedback("Senha incorreta.");
-        return;
-      }
-
-      // Se o usuário existir e os dados estiverem corretos, define como usuário ativo
-      UserService.setActiveUser(existingUser.email);
-      // Exibe mensagem de boas-vindas
-      setFeedback(`Bem-vindo(a) de volta, ${existingUser.name}!`);
-      // Após meio segundo, redireciona para a tela de boas-vindas
-      setTimeout(() => navigate("/welcome"), 500);
-      return;
-    }
-
-    // Se o usuário não existir, cria um novo objeto com os dados do formulário
-    const newUser = {
-      name,
-      email,
-      password,
-      profileImage: data.profileImage,
-      birthDate: data.birthDate,
-      gender: data.gender,
-      state: data.state,
-      techAreas: data.techAreas,
-      acceptTerms: data.acceptTerms,
-      academicBackground: data.academicBackground,
-    };
-
-    // Salva o novo usuário no localStorage
-    UserService.saveUser(newUser);
-    // Salva o email no localStorage (lista de emails registrados)
-    UserService.saveEmail(email);
-    // Define o usuário recém-criado como ativo
-    UserService.setActiveUser(email);
-
-    // Exibe mensagem de sucesso
-    setFeedback(`Cadastro realizado com sucesso, ${name}!`);
-    // Redireciona para tela de boas-vindas após 500ms
-    setTimeout(() => navigate("/welcome"), 500);
   };
 
   return (

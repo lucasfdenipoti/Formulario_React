@@ -1,4 +1,4 @@
-// Define um tipo (type alias) chamado `FormData` que representa os dados de um usuário/formulário
+// Define um tipo que representa os dados de um usuário/formulário
 export type FormData = {
   id: string;                // Identificador único do usuário (geralmente usado para identificar ou manipular registros)
   name: string;              // Nome do usuário 

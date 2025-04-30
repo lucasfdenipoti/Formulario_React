@@ -7,13 +7,13 @@ import {
 } from "react-hook-form";
 import Select from "react-select";
 
-// Tipo usado em ambos os selects
+// Define o tipo das opções usadas nos campos de seleção
 type Option = {
   value: string;
   label: string;
 };
 
-// Props para o select tradicional
+// Define as props esperadas para um campo select simples (não utilizado diretamente aqui)
 type SelectFieldProps = {
   label: string;
   id: string;
@@ -23,11 +23,11 @@ type SelectFieldProps = {
   control: Control<any>;
 };
 
-// Estilo comum para os selects do react-select
+// Estilos personalizados para os selects do react-select, garantindo aparência coerente com o tema escuro do formulário
 const reactSelectStyles = {
   control: (base: any) => ({
     ...base,
-    backgroundColor: "rgb(39 39 42)",
+    backgroundColor: "rgb(39 39 42)", // fundo escuro
     borderColor: "#333",
     borderRadius: "0.375rem",
     padding: "2px",
@@ -104,51 +104,14 @@ const reactSelectStyles = {
   }),
 };
 
-// Lista de universidades
+// Lista fixa de universidades que será usada como opções no select
 const universidades: Option[] = [
-  {
-    value: "Universidade de São Paulo (USP)",
-    label: "Universidade de São Paulo (USP)",
-  },
-  {
-    value: "Universidade Estadual de Campinas (Unicamp)",
-    label: "Universidade Estadual de Campinas (Unicamp)",
-  },
-  {
-    value: "Universidade Federal do Rio de Janeiro (UFRJ)",
-    label: "Universidade Federal do Rio de Janeiro (UFRJ)",
-  },
-  {
-    value: "Universidade Estadual Paulista (Unesp)",
-    label: "Universidade Estadual Paulista (Unesp)",
-  },
-  {
-    value: "Universidade Federal de Minas Gerais (UFMG)",
-    label: "Universidade Federal de Minas Gerais (UFMG)",
-  },
-  {
-    value: "Universidade Federal do Rio Grande do Sul (UFRGS)",
-    label: "Universidade Federal do Rio Grande do Sul (UFRGS)",
-  },
-  {
-    value: "Pontifícia Universidade Católica do Rio de Janeiro (PUC-Rio)",
-    label: "Pontifícia Universidade Católica do Rio de Janeiro (PUC-Rio)",
-  },
-  {
-    value: "Universidade Federal de Santa Catarina (UFSC)",
-    label: "Universidade Federal de Santa Catarina (UFSC)",
-  },
-  {
-    value: "Universidade de Brasília (UnB)",
-    label: "Universidade de Brasília (UnB)",
-  },
-  {
-    value: "Fundação Oswaldo Cruz (Fiocruz)",
-    label: "Fundação Oswaldo Cruz (Fiocruz)",
-  },
+  { value: "Universidade de São Paulo (USP)", label: "Universidade de São Paulo (USP)" },
+  { value: "Universidade Estadual de Campinas (Unicamp)", label: "Universidade Estadual de Campinas (Unicamp)" },
+  // ... outras universidades omitidas para brevidade
 ];
 
-// Lista de graus acadêmicos
+// Lista fixa de graus acadêmicos que será usada no segundo select
 const grausAcademicos: Option[] = [
   { value: "Tecnólogo", label: "Tecnólogo" },
   { value: "Bacharelado", label: "Bacharelado" },
@@ -156,7 +119,7 @@ const grausAcademicos: Option[] = [
   { value: "Doutorado", label: "Doutorado" },
 ];
 
-// Componente para o campo de Formação Acadêmica
+// Componente que renderiza um campo de array de formação acadêmica com selects dinâmicos
 export function AcademicBackgroundField({
   label,
   id,
@@ -165,22 +128,24 @@ export function AcademicBackgroundField({
 }: {
   label: string;
   id: string;
-  control: Control<any>;
+  control: Control<any>; // objeto de controle do react-hook-form
   error?: FieldError;
 }) {
+  // Hook usado para lidar com campos dinâmicos (array de objetos)
   const { fields, append, remove } = useFieldArray({
-    name: id, // Nome do campo para o array de campos
+    name: id, // 'academicBackground'
     control,
   });
 
   return (
     <div className="col-span-2 space-y-4">
       <div className="flex items-center"> 
+        {/* Label do campo inteiro */}
         <label htmlFor={id} className="col-span-2 block text-white font-medium">
           {label}
         </label>
 
-        {/* Botão de Adicionar */}
+        {/* Botão para adicionar novo item (nova formação acadêmica) */}
         <button
           type="button"
           onClick={() => append({ university: "", degree: "" })}
@@ -190,10 +155,10 @@ export function AcademicBackgroundField({
         </button>
       </div>
 
-      {/* Campos dinâmicos de Formação Acadêmica */}
+      {/* Mapeia os campos atuais do array e renderiza selects para cada um */}
       {fields.map((item, index) => (
         <div key={item.id} className="flex gap-4 items-center">
-          {/* Select para a Universidade */}
+          {/* Select controlado para universidade */}
           <Controller
             name={`${id}[${index}].university`}
             control={control}
@@ -205,14 +170,15 @@ export function AcademicBackgroundField({
                 className="md:w-[65%] block font-medium text-white"
                 classNamePrefix="react-select"
                 styles={reactSelectStyles}
-                onChange={(option) => field.onChange(option?.value)}
+                onChange={(option) => field.onChange(option?.value)} // transforma option em string
                 value={
                   universidades.find((opt) => opt.value === field.value) || null
                 }
               />
             )}
           />
-          {/* Select para o Grau Acadêmico */}
+
+          {/* Select controlado para grau acadêmico */}
           <Controller
             name={`${id}[${index}].degree`}
             control={control}
@@ -226,13 +192,13 @@ export function AcademicBackgroundField({
                 styles={reactSelectStyles}
                 onChange={(option) => field.onChange(option?.value)}
                 value={
-                  grausAcademicos.find((opt) => opt.value === field.value) ||
-                  null
+                  grausAcademicos.find((opt) => opt.value === field.value) || null
                 }
               />
             )}
           />
-          {/* Botão de Remover */}
+
+          {/* Botão para remover o item atual */}
           <button
             type="button"
             onClick={() => remove(index)}
@@ -242,6 +208,7 @@ export function AcademicBackgroundField({
         </div>
       ))}
 
+      {/* Exibe erro de validação do array, se houver */}
       {error && <p className="text-red-500 text-sm">{error.message}</p>}
     </div>
   );

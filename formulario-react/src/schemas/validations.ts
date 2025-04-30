@@ -7,23 +7,27 @@ export const emailPattern = {
 };
 
 // Expressão regular para validar senhas com ao menos:
+// - Uma letra maiúscula
+// - Uma letra minúscula
+// - Um número
 export const passwordPattern = {
-  value: /(?=.*[A-Z])(?=.*[a-z])(?=.*\d)/,
-  message: "A senha deve conter letra maiúscula, minúscula e número",
+  value: /(?=.*[A-Z])(?=.*[a-z])(?=.*\d)/, // A expressão regular
+  message: "A senha deve conter letra maiúscula, minúscula e número", // Mensagem de erro
 };
 
+// Schema de validação do formulário usando Zod
 export const formSchema = z.object({
-  // Campo Nome:
+  // Campo Nome: deve ser uma string e não pode ser vazio
   name: z.string().min(1, "Nome é obrigatório"),
 
-  // Campo Email:
+  // Campo Email: valida se o email tem o formato correto
   email: z.string().email("Email inválido"),
 
-  // Campo Senha:
+  // Campo Senha: deve ter pelo menos 6 caracteres e atender ao regex de senha
   password: z
     .string()
-    .min(6, "A senha deve ter no mínimo 6 caracteres")
-    .regex(passwordPattern.value, passwordPattern.message),
+    .min(6, "A senha deve ter no mínimo 6 caracteres") // Verifica o comprimento mínimo
+    .regex(passwordPattern.value, passwordPattern.message), // Valida a senha usando o regex
 
   // Campo Data de Nascimento:
   birthDate: z.string().refine((date) => {
@@ -46,43 +50,42 @@ export const formSchema = z.object({
 
     return hasTurned18; // true se a pessoa tiver 18 ou mais
   }, {
-    message: "Você deve ter pelo menos 18 anos e a data não pode ser no futuro",
+    message: "Você deve ter pelo menos 18 anos e a data não pode ser no futuro", // Mensagem de erro caso a pessoa não tenha 18 anos
   }),
 
-  // Campo Estado:
+  // Campo Estado: deve ser um objeto com 'label' e 'value' sendo strings
   state: z.object({
     label: z.string(),
     value: z.string(),
   }, {
-    message: "Selecione um estado",
+    message: "Selecione um estado", // Mensagem caso o campo estado não seja preenchido
   }),
 
-  // Campo Gênero:
+  // Campo Gênero: deve ser uma das opções listadas no enum
   gender: z.enum(["Masculino", "Feminino", "Outro"], {
-    errorMap: () => ({ message: "Selecione um gênero" }),
+    errorMap: () => ({ message: "Selecione um gênero" }), // Mensagem de erro personalizada
   }),
 
-  // Campo Áreas de TI:
+  // Campo Áreas de TI: deve ser um array de strings com pelo menos uma área
   techAreas: z.array(z.string())
-    .min(1, "Selecione pelo menos uma área de TI"),
+    .min(1, "Selecione pelo menos uma área de TI"), // Mensagem de erro caso o array esteja vazio
 
-  // Campo Aceite dos Termos:
+  // Campo Aceite dos Termos: deve ser verdadeiro para aceitar os termos
   acceptTerms: z.literal(true, {
-    errorMap: () => ({ message: "Você deve aceitar os termos" }),
+    errorMap: () => ({ message: "Você deve aceitar os termos" }), // Mensagem de erro caso o usuário não aceite os termos
   }),
 
-  // Campo Imagem de Perfil:
-  profileImage: z.string().min(1, "Foto de perfil é obrigatória"),
+  // Campo Imagem de Perfil: deve ser uma string não vazia
+  profileImage: z.string().min(1, "Foto de perfil é obrigatória"), // Mensagem de erro caso o campo não seja preenchido
 
   // Novo Campo de Formação Acadêmica:
   academicBackground: z.array(
     z.object({
-      university: z.string().min(1, "Universidade é obrigatória"),
-      degree: z.string().min(1, "Grau acadêmico é obrigatório"),
+      university: z.string().min(1, "Universidade é obrigatória"), // Mensagem caso o nome da universidade esteja vazio
+      degree: z.string().min(1, "Grau acadêmico é obrigatório"), // Mensagem caso o grau acadêmico esteja vazio
     })
-  ).min(1, "Você deve fornecer ao menos uma formação acadêmica"),
+  ).min(1, "Você deve fornecer ao menos uma formação acadêmica"), // Mensagem de erro caso o array de formações esteja vazio
 });
-
 
 // Cria um tipo TypeScript com base no schema acima
 // Isso garante que o mesmo formato será usado no código e na validação

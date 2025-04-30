@@ -7,45 +7,59 @@ import { InputField } from "../components/InputField";
 import { UserService } from "../services/UserService";
 import Wallpaper from "../assets/Wallpaper.jpg";
 
-// Esquema de validação com Zod para o formulário de login
+// Esquema de validação com Zod: email deve ser válido e senha com no mínimo 6 caracteres
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
 });
 
-// Tipo derivado do esquema
+// Define o tipo `LoginData` com base no esquema do Zod
 type LoginData = z.infer<typeof loginSchema>;
 
+// Componente de Login
 export function Login() {
+  // Inicializa o formulário com validação por Zod
   const {
-    register,
-    handleSubmit,
-    formState: { errors },
+    register, // registra os campos
+    handleSubmit, // lida com o submit
+    formState: { errors }, // armazena os erros de validação
   } = useForm<LoginData>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(loginSchema), // usa o schema do Zod como validador
   });
 
+  // Hook de feedback customizado (mensagens de erro ou sucesso)
   const { feedback, setFeedback, getFeedbackColor } = useFeedback();
+
+  // Hook de navegação
   const navigate = useNavigate();
 
+  // Função chamada ao enviar o formulário
   const handleLogin = (data: LoginData) => {
-    const email = data.email.trim().toLowerCase();
+    const email = data.email.trim().toLowerCase(); // normaliza o email
     const password = data.password;
 
+    // Verifica se o usuário existe
     const user = UserService.userExists(email);
 
+    // Usuário não encontrado
     if (!user) {
       setFeedback("Usuário não encontrado.");
       return;
     }
 
+    // Senha incorreta
     if (user.password !== password) {
       setFeedback("Senha incorreta.");
       return;
     }
 
+    // Define usuário como ativo (logado)
     UserService.setActiveUser(email);
+
+    // Mostra mensagem de boas-vindas
     setFeedback(`Bem-vindo(a) de volta, ${user.name}!`);
+
+    // Redireciona para tela de boas-vindas após breve atraso
     setTimeout(() => navigate("/welcome"), 500);
   };
 
@@ -87,7 +101,7 @@ export function Login() {
             Entrar
           </button>
 
-          {/* Botão para voltar ao cadastro */}
+          {/* Botão para voltar para a tela de cadastro */}
           <div className="flex justify-center mt-4">
             <button
               type="button"
@@ -98,7 +112,7 @@ export function Login() {
             </button>
           </div>
 
-          {/* Mensagem de feedback */}
+          {/* Exibe mensagem de erro ou sucesso, se houver */}
           {feedback && (
             <p className={`text-center mt-2 ${getFeedbackColor()}`}>
               {feedback}
